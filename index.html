@@ -12,14 +12,12 @@
     .container { max-width: 1100px; margin: 0 auto; }
     h1 { font-size: 1.6rem; font-weight: 700; color: #1a56db; margin-bottom: 2px; }
     .subtitle { color: #6b7280; font-size: 0.88rem; margin-bottom: 20px; }
-
     .upload-area { border: 2px dashed #93c5fd; border-radius: 14px; background: #eff6ff; padding: 32px; text-align: center; cursor: pointer; transition: all 0.2s; margin-bottom: 16px; }
     .upload-area:hover, .upload-area.drag { border-color: #1a56db; background: #dbeafe; }
     .upload-area input { display: none; }
     .upload-icon { font-size: 2.4rem; margin-bottom: 10px; }
     .upload-area p { color: #4b5563; font-size: 0.92rem; }
     .upload-area span { color: #1a56db; font-weight: 600; cursor: pointer; text-decoration: underline; }
-
     .file-queue { background: #fff; border-radius: 12px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); margin-bottom: 16px; overflow: hidden; display: none; }
     .file-queue-header { padding: 12px 16px; background: #f9fafb; border-bottom: 1px solid #e5e7eb; font-weight: 600; font-size: 0.88rem; color: #374151; display: flex; justify-content: space-between; align-items: center; }
     .file-item { display: flex; align-items: center; gap: 12px; padding: 10px 16px; border-bottom: 1px solid #f3f4f6; font-size: 0.88rem; }
@@ -32,33 +30,28 @@
     .status-error { background: #fee2e2; color: #991b1b; }
     .file-remove { cursor: pointer; color: #9ca3af; font-size: 1rem; padding: 2px 6px; border-radius: 4px; }
     .file-remove:hover { color: #ef4444; background: #fee2e2; }
-
-    .action-bar { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; display: none; }
+    .action-bar { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; }
     .btn { border: none; border-radius: 10px; padding: 10px 20px; font-size: 0.88rem; font-weight: 600; cursor: pointer; transition: filter 0.15s; display: inline-flex; align-items: center; gap: 6px; }
     .btn:hover { filter: brightness(0.92); }
     .btn:disabled { opacity: 0.5; cursor: not-allowed; }
     .btn-primary { background: #1a56db; color: #fff; }
     .btn-green { background: #059669; color: #fff; }
     .btn-gray { background: #6b7280; color: #fff; }
-
     .progress-wrap { margin-bottom: 16px; display: none; }
     .progress-label { font-size: 0.82rem; color: #6b7280; margin-bottom: 6px; }
     .progress-bar { background: #e5e7eb; border-radius: 99px; height: 8px; overflow: hidden; }
     .progress-fill { background: #1a56db; height: 100%; width: 0%; transition: width 0.3s; border-radius: 99px; }
-
     #resultsSection { display: none; }
     .badge { font-size: 0.7rem; padding: 2px 8px; border-radius: 99px; font-weight: 600; }
     .badge-blue { background: #dbeafe; color: #1a56db; }
     .badge-green { background: #d1fae5; color: #065f46; }
     .badge-yellow { background: #fef9c3; color: #92400e; }
     .badge-red { background: #fee2e2; color: #991b1b; }
-
     .summary-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px; }
     @media(max-width:700px) { .summary-grid { grid-template-columns: repeat(2,1fr); } }
     .summary-card { background: #fff; border-radius: 12px; padding: 16px; text-align: center; box-shadow: 0 1px 4px rgba(0,0,0,0.07); }
     .summary-card .s-label { font-size: 0.72rem; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; }
     .summary-card .s-val { font-size: 1.15rem; font-weight: 700; color: #1a56db; }
-
     .table-wrap { background: #fff; border-radius: 14px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); overflow-x: auto; margin-bottom: 20px; }
     table { width: 100%; border-collapse: collapse; font-size: 0.82rem; min-width: 1000px; }
     thead tr { background: #f9fafb; }
@@ -78,12 +71,12 @@
 <body>
 <div class="container">
   <h1>📄 SLIK OJK Extractor</h1>
-  <p class="subtitle">Upload satu atau lebih PDF SLIK OJK — ekstrak data debitur & fasilitas BPD Lampung + BPR Eka Bumi Artha</p>
+  <p class="subtitle">Upload satu atau lebih PDF SLIK OJK — ekstrak data debitur &amp; fasilitas BPD Lampung + BPR Eka Bumi Artha</p>
 
   <div class="upload-area" id="uploadArea">
     <input type="file" id="fileInput" accept=".pdf" multiple />
     <div class="upload-icon">📂</div>
-    <p>Seret & lepas beberapa file PDF ke sini, atau <span onclick="document.getElementById('fileInput').click()">pilih file</span></p>
+    <p>Seret &amp; lepas beberapa file PDF ke sini, atau <span onclick="document.getElementById('fileInput').click()">pilih file</span></p>
     <p style="margin-top:6px;font-size:0.78rem;color:#9ca3af;">Bisa pilih banyak file sekaligus (Ctrl+klik)</p>
   </div>
 
@@ -97,7 +90,7 @@
     <div id="fileList"></div>
   </div>
 
-  <div class="action-bar" id="actionBar">
+  <div class="action-bar" id="actionBar" style="display:none">
     <button class="btn btn-primary" id="btnProcess" onclick="processAll()">⚙️ Proses Semua PDF</button>
     <button class="btn btn-gray" onclick="clearAll()">🗑️ Hapus Semua</button>
   </div>
@@ -114,13 +107,11 @@
       <div class="summary-card"><div class="s-label">Total Fasilitas</div><div class="s-val" id="sFasilitas">0</div></div>
       <div class="summary-card"><div class="s-label">Total Baki Debet</div><div class="s-val" id="sBaki">Rp 0</div></div>
     </div>
-
     <div class="export-bar">
       <button class="btn btn-green" onclick="exportExcel()">📊 Export Excel (.xlsx)</button>
       <button class="btn btn-primary" onclick="exportCSV()">⬇️ Export CSV</button>
       <button class="btn btn-gray" onclick="exportJSON()">📋 Export JSON</button>
     </div>
-
     <div class="section-title">
       🏦 Hasil Ekstraksi
       <span class="badge badge-blue" id="rowBadge">0 baris</span>
@@ -129,18 +120,11 @@
       <table>
         <thead>
           <tr>
-            <th>#</th>
-            <th>Nama Debitur</th>
-            <th>NIK</th>
-            <th>TTL</th>
-            <th>Bank / Kreditur</th>
-            <th>No. Rekening / Akad</th>
-            <th>Plafon Awal</th>
-            <th>Baki Debet</th>
-            <th>Awal Fasilitas</th>
-            <th>Akhir Fasilitas</th>
-            <th>Suku Bunga</th>
-            <th>Kualitas</th>
+            <th>#</th><th>Nama Debitur</th><th>NIK</th><th>TTL</th>
+            <th>Bank / Kreditur</th><th>No. Rekening / Akad</th>
+            <th>Plafon Awal</th><th>Baki Debet</th>
+            <th>Awal Fasilitas</th><th>Akhir Fasilitas</th>
+            <th>Suku Bunga</th><th>Kualitas</th>
           </tr>
         </thead>
         <tbody id="tableBody"></tbody>
@@ -152,14 +136,11 @@
 <script>
 pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
-let fileQueue = [];
-let allRows   = [];
-let idCounter = 0;
+let fileQueue = [], allRows = [], idCounter = 0;
 
-// ── Drag & drop ──────────────────────────────────────────────────────────────
+// ── Upload / Drag ──────────────────────────────────────────────────────────────
 const uploadArea = document.getElementById('uploadArea');
 const fileInput  = document.getElementById('fileInput');
-
 uploadArea.addEventListener('dragover', e => { e.preventDefault(); uploadArea.classList.add('drag'); });
 uploadArea.addEventListener('dragleave', () => uploadArea.classList.remove('drag'));
 uploadArea.addEventListener('drop', e => { e.preventDefault(); uploadArea.classList.remove('drag'); addFiles([...e.dataTransfer.files]); });
@@ -167,7 +148,7 @@ fileInput.addEventListener('change', () => { addFiles([...fileInput.files]); fil
 
 function addFiles(files) {
   files.forEach(f => {
-    if (f.type !== 'application/pdf') { showError(`"${f.name}" bukan PDF, dilewati.`); return; }
+    if (f.type !== 'application/pdf') { showError(`"${f.name}" bukan PDF.`); return; }
     if (fileQueue.find(q => q.file.name === f.name && q.file.size === f.size)) return;
     fileQueue.push({ file: f, id: ++idCounter, status: 'waiting', data: null });
   });
@@ -175,7 +156,6 @@ function addFiles(files) {
 }
 
 function renderQueue() {
-  const list = document.getElementById('fileList');
   if (!fileQueue.length) {
     document.getElementById('fileQueue').style.display = 'none';
     document.getElementById('actionBar').style.display = 'none';
@@ -184,21 +164,16 @@ function renderQueue() {
   document.getElementById('fileQueue').style.display = 'block';
   document.getElementById('actionBar').style.display = 'flex';
   document.getElementById('queueCount').textContent = fileQueue.length + ' file';
-  list.innerHTML = fileQueue.map(item => `
+  document.getElementById('fileList').innerHTML = fileQueue.map(item => `
     <div class="file-item">
       <span>📄</span>
       <span class="file-name" title="${item.file.name}">${item.file.name}</span>
-      <span class="file-status status-${item.status}">${statusLabel(item.status)}</span>
-      ${item.status === 'waiting' ? `<span class="file-remove" onclick="removeFile(${item.id})">✕</span>` : ''}
+      <span class="file-status status-${item.status}">${{waiting:'Menunggu',processing:'Memproses...',done:'✓ Selesai',error:'✗ Error'}[item.status]}</span>
+      ${item.status==='waiting'?`<span class="file-remove" onclick="removeFile(${item.id})">✕</span>`:''}
     </div>`).join('');
 }
 
-function statusLabel(s) {
-  return { waiting:'Menunggu', processing:'Memproses...', done:'✓ Selesai', error:'✗ Error' }[s] || s;
-}
-
 function removeFile(id) { fileQueue = fileQueue.filter(q => q.id !== id); renderQueue(); }
-
 function clearAll() {
   fileQueue = []; allRows = [];
   renderQueue();
@@ -206,25 +181,49 @@ function clearAll() {
   document.getElementById('progressWrap').style.display = 'none';
   document.getElementById('errors').innerHTML = '';
 }
-
 function showError(msg) {
   const d = document.createElement('div');
-  d.className = 'error-toast';
-  d.textContent = '⚠️ ' + msg;
+  d.className = 'error-toast'; d.textContent = '⚠️ ' + msg;
   document.getElementById('errors').appendChild(d);
   setTimeout(() => d.remove(), 6000);
 }
-
 function setProgress(pct, label) {
   document.getElementById('progressWrap').style.display = 'block';
   document.getElementById('progressFill').style.width = pct + '%';
   document.getElementById('progressLabel').textContent = label;
 }
 
-// ── Process ───────────────────────────────────────────────────────────────────
+// ── PDF Text Extraction ────────────────────────────────────────────────────────
+// Gunakan metode yang sama persis seperti output pdf.js di browser:
+// items dalam 1 baris Y yang sama → digabung spasi, beda baris Y → newline
+async function extractPDFText(file) {
+  const buf = await file.arrayBuffer();
+  const pdf = await pdfjsLib.getDocument({ data: buf }).promise;
+  let fullText = '';
+  for (let p = 1; p <= pdf.numPages; p++) {
+    const page    = await pdf.getPage(p);
+    const content = await page.getTextContent();
+    let pageText  = '';
+    let lastY     = null;
+    for (const item of content.items) {
+      const y = item.transform ? Math.round(item.transform[5]) : null;
+      if (lastY !== null && y !== null && Math.abs(y - lastY) > 2) {
+        pageText += '\n';
+      } else if (pageText.length > 0 && !pageText.endsWith(' ') && item.str && !item.str.startsWith(' ')) {
+        pageText += ' ';
+      }
+      pageText += item.str;
+      lastY = y;
+    }
+    fullText += pageText + '\n';
+  }
+  return fullText;
+}
+
+// ── Process ────────────────────────────────────────────────────────────────────
 async function processAll() {
   const waiting = fileQueue.filter(q => q.status === 'waiting');
-  if (!waiting.length) { showError('Tidak ada file baru untuk diproses.'); return; }
+  if (!waiting.length) { showError('Tidak ada file baru.'); return; }
   document.getElementById('btnProcess').disabled = true;
   document.getElementById('errors').innerHTML = '';
 
@@ -232,14 +231,14 @@ async function processAll() {
     const item = waiting[i];
     item.status = 'processing';
     renderQueue();
-    setProgress(Math.round(i / waiting.length * 100), `Memproses file ${i+1}/${waiting.length}: ${item.file.name}`);
+    setProgress(Math.round(i / waiting.length * 100), `Memproses ${i+1}/${waiting.length}: ${item.file.name}`);
     try {
       const text = await extractPDFText(item.file);
-      item.data = extractData(text);
+      item.data  = extractData(text);
       item.status = 'done';
     } catch(e) {
       item.status = 'error';
-      showError(`Gagal proses "${item.file.name}": ${e.message}`);
+      showError(`Gagal: "${item.file.name}" — ${e.message}`);
     }
     renderQueue();
   }
@@ -251,54 +250,24 @@ async function processAll() {
   document.getElementById('btnProcess').disabled = false;
 }
 
-async function extractPDFText(file) {
-  const buf = await file.arrayBuffer();
-  const pdf = await pdfjsLib.getDocument({ data: buf }).promise;
-  let text = '';
-  for (let p = 1; p <= pdf.numPages; p++) {
-    const page = await pdf.getPage(p);
-    const content = await page.getTextContent();
-    // Gabungkan items dengan newline agar mirip output pdfminer/pymupdf
-    let pageText = '';
-    let lastY = null;
-    for (const item of content.items) {
-      const y = item.transform ? Math.round(item.transform[5]) : null;
-      if (lastY !== null && y !== null && Math.abs(y - lastY) > 2) pageText += '\n';
-      pageText += item.str;
-      lastY = y;
-    }
-    text += pageText + '\n';
-  }
-  return text;
-}
-
-// ── Extraction ────────────────────────────────────────────────────────────────
+// ── Extract Data ───────────────────────────────────────────────────────────────
 function extractData(text) {
-  return {
-    debitur:   extractDebitur(text),
-    fasilitas: extractFasilitas(text)
-  };
+  return { debitur: extractDebitur(text), fasilitas: extractFasilitas(text) };
 }
 
 function extractDebitur(text) {
   const d = {};
 
-  // Nama: baris ALLCAPS sebelum "NIK /"
-  const namaM = text.match(/\n([A-Z][A-Z\s]{2,40})\nNIK \//);
+  // Format pdf.js: " YUNIATI NIK /" — nama CAPS diikuti " NIK /"
+  const namaM = text.match(/([A-Z]{2,}(?:\s+[A-Z]+)*)\s+NIK\s*\//);
   if (namaM) d.nama = namaM[1].trim();
 
-  // Fallback: kata kunci "Nama" lalu baris berikutnya
-  if (!d.nama) {
-    const namaM2 = text.match(/\bNama\b\n([A-Z][A-Z\s]{2,40})\n/);
-    if (namaM2) d.nama = namaM2[1].trim();
-  }
-
-  // NIK: 16 digit setelah "NIK /"
-  const nikM = text.match(/NIK \/?[\s\n]+(\d{16})/);
+  // NIK: 16 digit setelah "NIK /" (bisa di baris berikutnya)
+  const nikM = text.match(/NIK\s*\/[\s\n]*(\d{16})/);
   if (nikM) d.nik = nikM[1];
 
-  // TTL: "KOTA / dd bulan yyyy"
-  const ttlM = text.match(/\n([A-Z]{3,})\s*\/\s*\n?(\d{1,2}\s+\w+\s+\d{4})/);
+  // TTL: "KEBUMEN /\n30 Juni 1976"
+  const ttlM = text.match(/([A-Z]{3,})\s*\/\s*\n?(\d{1,2}\s+\w+\s+\d{4})/);
   if (ttlM) d.ttl = ttlM[1].trim() + ' / ' + ttlM[2].trim();
 
   // Jenis kelamin
@@ -306,7 +275,7 @@ function extractDebitur(text) {
   if (jkM) d.jenisKelamin = jkM[1];
 
   // Tanggal laporan
-  const tglM = text.match(/Tanggal Permintaan\n(\d{2}\s+\w+\s+\d{4}\s+\d{2}:\d{2}:\d{2})/);
+  const tglM = text.match(/(\d{2}\s+\w+\s+\d{4}\s+\d{2}:\d{2}:\d{2})/);
   if (tglM) d.tglLaporan = tglM[1];
 
   return d;
@@ -315,80 +284,80 @@ function extractDebitur(text) {
 function extractFasilitas(text) {
   const results = [];
 
-  // Target bank dengan pattern pencarian di teks PDF (newline-aware)
-  const targets = [
-    {
-      name: 'PT BPD Lampung',
-      // "121 - PT BPD Lampung" muncul di blok fasilitas
-      regex: /121\s*-\s*PT BPD Lampung/g
-    },
-    {
-      name: 'PT. Bank Perekonomian Rakyat Eka Bumi Artha',
-      // Teks terpotong newline: "Eka\nBumi Artha" atau "Eka Bumi Artha"
-      regex: /601109\s*-\s*PT\.\s*Bank Perekonomian Rakyat Eka[\s\n]+Bumi Artha/g
+  // === BPD LAMPUNG ===
+  // Format pdf.js: "121 - PT BPD Lampung PT.BANK LAMPUNG CAB.KOTABUMI Rp 40.000.000,00 10 Maret 2026"
+  // Semua di satu baris!
+  const bpdRegex = /121\s*-\s*PT BPD Lampung[^\n]*/g;
+  let m;
+  while ((m = bpdRegex.exec(text)) !== null) {
+    const headerLine = m[0];
+    const blockStart = m.index;
+    const block = text.substring(blockStart, blockStart + 2000);
+
+    // Baki debet ada di header line: "Rp 40.000.000,00"
+    const bakiM = headerLine.match(/Rp\s+([\d\.,]+)/);
+    const preBlock = text.substring(Math.max(0, m.index - 300), m.index);
+
+    const f = parseBlock(block, 'PT BPD Lampung', bakiM ? bakiM[1] : null, preBlock);
+    if (f && !results.find(r => r.noRekening === f.noRekening && r.namaBank === f.namaBank)) {
+      results.push(f);
     }
-  ];
+  }
 
-  for (const target of targets) {
-    let m;
-    target.regex.lastIndex = 0;
-    while ((m = target.regex.exec(text)) !== null) {
-      const blockStart = m.index;
-      // Ambil blok 2000 karakter — cukup untuk dapat semua field
-      const block = text.substring(blockStart, blockStart + 2000);
+  // === BPR EKA BUMI ARTHA ===
+  const bprRegex = /601109\s*-\s*PT\.\s*Bank Perekonomian Rakyat Eka[\s\S]{0,20}?Bumi Artha/g;
+  while ((m = bprRegex.exec(text)) !== null) {
+    const blockStart = m.index;
+    const block = text.substring(blockStart, blockStart + 2000);
+    const bakiM = block.match(/Rp\s+([\d\.,]+)\s+\d{2}\s+\w+\s+\d{4}/);
+    const preBlock = text.substring(Math.max(0, blockStart - 300), blockStart);
 
-      const f = parseBlock(block, target.name, text, blockStart);
-      if (f) {
-        // Hindari duplikat berdasarkan noRekening+namaBank
-        const isDup = f.noRekening
-          ? results.some(r => r.noRekening === f.noRekening && r.namaBank === f.namaBank)
-          : false;
-        if (!isDup) results.push(f);
-      }
+    const f = parseBlock(block, 'PT. Bank Perekonomian Rakyat Eka Bumi Artha', bakiM ? bakiM[1] : null, preBlock);
+    if (f && !results.find(r => r.noRekening === f.noRekening && r.namaBank === f.namaBank)) {
+      results.push(f);
     }
   }
 
   return results;
 }
 
-function parseBlock(block, bankName, fullText, blockStart) {
+function parseBlock(block, bankName, bakiRaw, preBlock) {
   const f = { namaBank: bankName };
 
-  // Baki Debet — muncul di baris dekat nama bank: "Rp xxx\ndd Mmm yyyy"
-  const bakiNearM = block.match(/Rp\s+([\d\.,]+)\n\d{2}\s+\w+\s+\d{4}\nPelapor/);
-  if (bakiNearM) f.bakiDebet = 'Rp ' + bakiNearM[1];
+  // Baki Debet (dari header line)
+  if (bakiRaw) f.bakiDebet = 'Rp ' + bakiRaw;
 
-  // No Akad Awal
-  const akadM = block.match(/No Akad Awal\n([A-Z0-9\/\\_\-\.]+)/);
+  // No Akad Awal — format: "No Akad Awal REG2602030004_UNIATI46550 Realisasi..."
+  const akadM = block.match(/No Akad Awal\s+([A-Z0-9\/\\_\-\.]+)\s/);
   if (akadM) f.noRekening = akadM[1].trim();
 
-  // Suku Bunga (muncul sebelum Plafon Awal di struktur PDF)
-  const bungaM = block.match(/Suku Bunga\/Imbalan\n([\d\.]+)\s*%/);
+  // Suku Bunga — format: "Suku Bunga/Imbalan 14.2 % Jenis..."
+  const bungaM = block.match(/Suku Bunga\/Imbalan\s+([\d\.]+)\s*%/);
   if (bungaM) f.sukuBunga = bungaM[1] + '%';
 
-  // Plafon Awal
-  const plafM = block.match(/Plafon Awal\nRp\s+([\d\.,]+)/);
+  // Plafon Awal — format: "Plafon Awal Rp 40.000.000,00"
+  const plafM = block.match(/Plafon Awal\s+Rp\s+([\d\.,]+)/);
   if (plafM) f.plafonAwal = 'Rp ' + plafM[1];
 
   // Tanggal Awal Kredit
-  const awalM = block.match(/Tanggal Awal Kredit\n(\d{2}\s+\w+\s+\d{4})/);
+  const awalM = block.match(/Tanggal Awal Kredit\s+(\d{1,2}\s+\w+\s+\d{4})/);
   if (awalM) f.awalFasilitas = awalM[1];
 
   // Tanggal Jatuh Tempo
-  const jtM = block.match(/Tanggal Jatuh Tempo\n(\d{2}\s+\w+\s+\d{4})/);
+  const jtM = block.match(/Tanggal Jatuh Tempo\s+(\d{1,2}\s+\w+\s+\d{4})/);
   if (jtM) f.akhirFasilitas = jtM[1];
 
-  // Kualitas — tepat setelah "No Rekening\nXXX\nKualitas\nN - Label"
-  // Cari di blok SEBELUM nama bank (grafik kualitas muncul duluan)
-  const preBlock = fullText.substring(Math.max(0, blockStart - 400), blockStart + 200);
-  const kualM = preBlock.match(/Kualitas\n(\d+\s*-\s*[\w\s]+)\n(?:\d|Jun|Apr|Mei|Sep|Jan|Feb|Mar)/);
+  // Kualitas — ada di baris SEBELUM nama bank: "No Rekening Kualitas 1 - Lancar"
+  // Gunakan preBlock (300 char sebelum nama bank)
+  const kualSearch = (preBlock || '') + block.substring(0, 200);
+  const kualM = kualSearch.match(/No Rekening[^\n]*Kualitas\s+(\d+\s*-\s*[\w\s]+?)(?:\n|Jun|Apr|Mei|Sep|Jan|Feb|Mar|$)/);
   if (kualM) f.kualitas = kualM[1].trim();
 
   if (!f.noRekening && !f.bakiDebet) return null;
   return f;
 }
 
-// ── Build rows ─────────────────────────────────────────────────────────────────
+// ── Rows & Render ──────────────────────────────────────────────────────────────
 function buildAllRows() {
   allRows = [];
   fileQueue.filter(q => q.status === 'done' && q.data).forEach(item => {
@@ -401,19 +370,18 @@ function buildAllRows() {
   });
 }
 
-// ── Render table ───────────────────────────────────────────────────────────────
 function renderResults() {
-  const done   = fileQueue.filter(q => q.status === 'done');
-  const unik   = new Set(done.map(q => q.data?.debitur?.nik).filter(Boolean));
-  const totBaki = allRows.reduce((s, r) => s + parseRp(r.bakiDebet || ''), 0);
+  const done    = fileQueue.filter(q => q.status === 'done');
+  const unikNIK = new Set(done.map(q => q.data?.debitur?.nik).filter(Boolean));
+  const totBaki = allRows.reduce((s, r) => s + parseRp(r.bakiDebet||''), 0);
 
-  document.getElementById('sFile').textContent     = done.length;
-  document.getElementById('sDebitur').textContent  = unik.size;
+  document.getElementById('sFile').textContent      = done.length;
+  document.getElementById('sDebitur').textContent   = unikNIK.size;
   document.getElementById('sFasilitas').textContent = allRows.length;
-  document.getElementById('sBaki').textContent      = formatRp(totBaki);
-  document.getElementById('rowBadge').textContent  = allRows.length + ' baris';
+  document.getElementById('sBaki').textContent       = formatRp(totBaki);
+  document.getElementById('rowBadge').textContent   = allRows.length + ' baris';
 
-  document.getElementById('tableBody').innerHTML = allRows.map((r, i) => `
+  document.getElementById('tableBody').innerHTML = allRows.map((r,i) => `
     <tr>
       <td>${i+1}</td>
       <td class="td-name">${r.nama||'—'}</td>
@@ -430,11 +398,11 @@ function renderResults() {
     </tr>`).join('');
 
   document.getElementById('resultsSection').style.display = 'block';
-  document.getElementById('resultsSection').scrollIntoView({ behavior: 'smooth' });
+  document.getElementById('resultsSection').scrollIntoView({ behavior:'smooth' });
 }
 
 function renderKualitas(k) {
-  if (!k || k === '—') return '—';
+  if (!k || k==='—') return '—';
   const cls = k.startsWith('1') ? 'badge-green' : k.startsWith('2') ? 'badge-yellow' : k.startsWith('5') ? 'badge-red' : 'badge-blue';
   return `<span class="badge ${cls}">${k}</span>`;
 }
@@ -444,114 +412,79 @@ function exportExcel() {
   if (!allRows.length) return;
   const wb = XLSX.utils.book_new();
 
-  // Sheet 1: Detail Fasilitas
   const headers = ['No','Nama Debitur','NIK','Tempat/Tgl Lahir','Jenis Kelamin',
-                   'Bank / Kreditur','No. Rekening/Akad','Plafon Awal (Rp)',
-                   'Baki Debet (Rp)','Awal Fasilitas','Akhir Fasilitas',
-                   'Suku Bunga (%)','Kualitas','File Sumber'];
+    'Bank / Kreditur','No. Rekening/Akad','Plafon Awal (Rp)','Baki Debet (Rp)',
+    'Awal Fasilitas','Akhir Fasilitas','Suku Bunga (%)','Kualitas','File Sumber'];
 
-  const rows = allRows.map((r, i) => [
-    i+1,
-    r.nama        || '',
-    r.nik         || '',
-    r.ttl         || '',
-    r.jenisKelamin|| '',
-    r.namaBank    || '',
-    r.noRekening  || '',
-    parseRp(r.plafonAwal || ''),
-    parseRp(r.bakiDebet  || ''),
-    r.awalFasilitas  || '',
-    r.akhirFasilitas || '',
+  const rows = allRows.map((r,i) => [
+    i+1, r.nama||'', r.nik||'', r.ttl||'', r.jenisKelamin||'',
+    r.namaBank||'', r.noRekening||'',
+    parseRp(r.plafonAwal||''), parseRp(r.bakiDebet||''),
+    r.awalFasilitas||'', r.akhirFasilitas||'',
     r.sukuBunga ? parseFloat(r.sukuBunga) : '',
-    r.kualitas    || '',
-    r.sourceFile  || ''
+    r.kualitas||'', r.sourceFile||''
   ]);
 
   const ws1 = XLSX.utils.aoa_to_sheet([headers, ...rows]);
-  ws1['!cols'] = [4,22,18,26,12,42,30,18,18,18,18,10,22,30].map(w => ({ wch: w }));
-
-  // Format angka
-  rows.forEach((_, i) => {
-    const row = i + 2;
-    ['H','I'].forEach(col => {
-      const c = ws1[col+row];
-      if (c && typeof c.v === 'number') c.z = '#,##0';
-    });
-    const pc = ws1['L'+row];
-    if (pc && typeof pc.v === 'number') pc.z = '0.00';
+  ws1['!cols'] = [4,22,18,26,12,44,32,18,18,18,18,10,22,30].map(w=>({wch:w}));
+  rows.forEach((_,i) => {
+    ['H','I'].forEach(col => { const c = ws1[col+(i+2)]; if(c && typeof c.v==='number') c.z='#,##0'; });
+    const pc = ws1['L'+(i+2)]; if(pc && typeof pc.v==='number') pc.z='0.00';
   });
-
   XLSX.utils.book_append_sheet(wb, ws1, 'Fasilitas Kredit');
 
-  // Sheet 2: Ringkasan per Debitur
+  // Sheet 2 ringkasan
   const map = {};
   allRows.forEach(r => {
-    const key = r.nik || r.nama || '_';
-    if (!map[key]) map[key] = { nama: r.nama, nik: r.nik, ttl: r.ttl, rows: [] };
-    if (r.namaBank && r.namaBank !== '—') map[key].rows.push(r);
+    const k = r.nik||r.nama||'_';
+    if (!map[k]) map[k] = { nama:r.nama, nik:r.nik, ttl:r.ttl, rows:[] };
+    if (r.namaBank && r.namaBank!=='—') map[k].rows.push(r);
   });
-
   const sh2 = [['Nama Debitur','NIK','Tempat/Tgl Lahir','Jml Fasilitas','Total Plafon Awal (Rp)','Total Baki Debet (Rp)']];
-  Object.values(map).forEach(d => {
-    sh2.push([
-      d.nama||'', d.nik||'', d.ttl||'', d.rows.length,
-      d.rows.reduce((s,f) => s+parseRp(f.plafonAwal||''), 0),
-      d.rows.reduce((s,f) => s+parseRp(f.bakiDebet||''),  0)
-    ]);
-  });
-
+  Object.values(map).forEach(d => sh2.push([
+    d.nama||'', d.nik||'', d.ttl||'', d.rows.length,
+    d.rows.reduce((s,f)=>s+parseRp(f.plafonAwal||''),0),
+    d.rows.reduce((s,f)=>s+parseRp(f.bakiDebet||''),0)
+  ]));
   const ws2 = XLSX.utils.aoa_to_sheet(sh2);
-  ws2['!cols'] = [22,18,26,10,20,20].map(w => ({ wch: w }));
-  sh2.slice(1).forEach((_, i) => {
-    ['E','F'].forEach(col => {
-      const c = ws2[col+(i+2)];
-      if (c && typeof c.v === 'number') c.z = '#,##0';
-    });
+  ws2['!cols'] = [22,18,26,10,20,20].map(w=>({wch:w}));
+  sh2.slice(1).forEach((_,i) => {
+    ['E','F'].forEach(col => { const c=ws2[col+(i+2)]; if(c&&typeof c.v==='number') c.z='#,##0'; });
   });
   XLSX.utils.book_append_sheet(wb, ws2, 'Ringkasan Debitur');
 
-  const ts = new Date().toISOString().slice(0,10);
-  XLSX.writeFile(wb, `SLIK_Export_${ts}.xlsx`);
+  XLSX.writeFile(wb, `SLIK_Export_${new Date().toISOString().slice(0,10)}.xlsx`);
 }
 
-// ── Export CSV ─────────────────────────────────────────────────────────────────
 function exportCSV() {
   if (!allRows.length) return;
-  const hdr = ['No','Nama Debitur','NIK','TTL','Jenis Kelamin','Bank','No. Rekening/Akad','Plafon Awal','Baki Debet','Awal Fasilitas','Akhir Fasilitas','Suku Bunga','Kualitas','File Sumber'];
+  const hdr = ['No','Nama','NIK','TTL','Jenis Kelamin','Bank','No. Rekening/Akad','Plafon Awal','Baki Debet','Awal Fasilitas','Akhir Fasilitas','Suku Bunga','Kualitas','File'];
   const rows = allRows.map((r,i) => [
-    i+1, r.nama||'', r.nik||'', r.ttl||'', r.jenisKelamin||'',
-    r.namaBank||'', r.noRekening||'', r.plafonAwal||'', r.bakiDebet||'',
-    r.awalFasilitas||'', r.akhirFasilitas||'', r.sukuBunga||'', r.kualitas||'', r.sourceFile||''
+    i+1,r.nama||'',r.nik||'',r.ttl||'',r.jenisKelamin||'',
+    r.namaBank||'',r.noRekening||'',r.plafonAwal||'',r.bakiDebet||'',
+    r.awalFasilitas||'',r.akhirFasilitas||'',r.sukuBunga||'',r.kualitas||'',r.sourceFile||''
   ]);
-  const csv = [hdr,...rows].map(r => r.map(v => `"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const csv = [hdr,...rows].map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
   download('SLIK_Export.csv', '\uFEFF'+csv, 'text/csv;charset=utf-8;');
 }
 
-// ── Export JSON ────────────────────────────────────────────────────────────────
 function exportJSON() {
   if (!allRows.length) return;
-  const out = fileQueue.filter(q => q.data).map(q => ({ file: q.file.name, ...q.data }));
-  download('SLIK_Export.json', JSON.stringify(out, null, 2), 'application/json');
+  download('SLIK_Export.json', JSON.stringify(fileQueue.filter(q=>q.data).map(q=>({file:q.file.name,...q.data})),null,2), 'application/json');
 }
 
 function download(filename, content, type) {
   const a = document.createElement('a');
-  a.href = URL.createObjectURL(new Blob([content], { type }));
+  a.href = URL.createObjectURL(new Blob([content], {type}));
   a.download = filename;
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
+  document.body.appendChild(a); a.click(); a.remove();
 }
 
 function parseRp(str) {
-  if (!str || str === '—') return 0;
-  // Format: "Rp 40.000.000,00" → 40000000
+  if (!str || str==='—') return 0;
   return parseFloat(str.replace(/[Rp\s]/g,'').replace(/\./g,'').replace(',','.')) || 0;
 }
-
-function formatRp(num) {
-  return 'Rp ' + Math.round(num).toLocaleString('id-ID');
-}
+function formatRp(num) { return 'Rp ' + Math.round(num).toLocaleString('id-ID'); }
 </script>
 </body>
 </html>
