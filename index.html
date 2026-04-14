@@ -281,7 +281,7 @@
       <h1>SLIK OJK Extractor</h1>
       <p class="subtitle">Upload satu atau lebih PDF SLIK OJK — ekstrak data debitur &amp; fasilitas kredit secara otomatis</p>
     </div>
-    <span class="version-chip">v2.6</span>
+    <span class="version-chip">v2.7</span>
   </div>
 
   <!-- Upload Area -->
@@ -636,9 +636,9 @@ function extractFasilitas(text) {
   });
 
   // === BPR EKA BUMI ARTHA ===
-  // Raw text: "601109 - PT. Bank Perekonomian Rakyat Eka KC Kotabumi Rp ...\nBumi Artha"
-  // Nama terpotong newline antara "Eka" dan "Bumi Artha"
-  const bprRegex = /601109\s*-\s*PT\.?\s*Bank\s*Perekonomian\s*Rakyat\s*Eka[^\n]*\n[^\n]*Bumi\s*Artha/gi;
+  // pdf.js bisa output "Eka\nBumi Artha" atau "Eka Bumi Artha" tergantung koordinat Y
+  // Gunakan [\s\S]{0,40} agar match keduanya
+  const bprRegex = /601109\s*-\s*PT\.?\s*Bank\s*Perekonomian\s*Rakyat\s*Eka[\s\S]{0,40}?Bumi\s*Artha/gi;
   const bprMatches = [];
   while ((m = bprRegex.exec(text)) !== null) {
     bprMatches.push({ index: m.index });
@@ -828,11 +828,27 @@ function showDebug(id) {
   const d = item.data;
   document.getElementById('debugFileName').textContent = item.file.name;
   const body = document.getElementById('debugBody');
+
+  // Test regex BPR live
+  const bprRegex = /601109[\s\S]{0,40}?Bumi\s*Artha/gi;
+  const bprMatch = bprRegex.exec(item.rawText || '');
+  const bprFound = bprMatch ? bprMatch[0].replace(/</g,'&lt;') : '(tidak ditemukan)';
+
+  // Cari "No Rekening" di raw text
+  const norekIdx = (item.rawText||'').indexOf('No Rekening');
+  const norekSnippet = norekIdx >= 0
+    ? (item.rawText||'').substring(norekIdx, norekIdx+100).replace(/</g,'&lt;')
+    : '(tidak ditemukan)';
+
   body.innerHTML = `
     <div class="debug-field"><div class="debug-label">Debitur</div>
       <div class="debug-val">${JSON.stringify(d.debitur, null, 2)}</div></div>
     <div class="debug-field"><div class="debug-label">Fasilitas Ditemukan (${d.fasilitas.length})</div>
       <div class="debug-val">${JSON.stringify(d.fasilitas, null, 2)}</div></div>
+    <div class="debug-field"><div class="debug-label">BPR Regex Match</div>
+      <pre>${bprFound}</pre></div>
+    <div class="debug-field"><div class="debug-label">No Rekening (raw text snippet)</div>
+      <pre>${norekSnippet}</pre></div>
     <div class="debug-field"><div class="debug-label">Raw Text (500 karakter pertama)</div>
       <pre>${(item.rawText||'').substring(0,500).replace(/</g,'&lt;')}</pre></div>`;
   document.getElementById('debugModal').classList.add('open');
