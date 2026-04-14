@@ -668,14 +668,16 @@ function parseBlock(block, bankName, bakiRaw, preBlock, bankType) {
 
   // No Rekening / Akad
   if (bankType === 'bpr') {
-    // Coba berbagai variasi format pdf.js:
-    // "No Rekening 1510516360 Kualitas..."  → spasi normal
-    // "No Rekening\n1510516360 Kualitas..."  → newline sebelum angka
-    // "No Rekening1510516360 Kualitas..."    → tanpa spasi
+    // Berbagai variasi format pdf.js untuk No Rekening BPR:
+    // 1. "No Rekening 1510516360 Kualitas..."       → nomor & kualitas satu baris
+    // 2. "No Rekening\n1510516360 Kualitas..."       → newline sebelum angka
+    // 3. "No Rekening1510516360 Kualitas..."         → tanpa spasi
+    // 4. "No Rekening Kualitas 5 - Macet\n2075\n"   → nomor di baris SETELAH kualitas (format YUNIATI)
     const norekPatterns = [
-      /No Rekening\s+(\d{6,15})\s+Kualitas/,
-      /No Rekening\s*\n\s*(\d{6,15})/,
-      /No Rekening\s*(\d{6,15})/,
+      /No Rekening\s+(\d{6,15})\s+Kualitas/,          // nomor sebelum Kualitas
+      /No Rekening\s*\n\s*(\d{6,15})/,                 // newline sebelum nomor
+      /No Rekening\s*(\d{6,15})/,                      // langsung tanpa spasi
+      /No Rekening\s+Kualitas[^\n]*\n\s*(\d{4,15})\b/, // nomor di baris setelah "No Rekening Kualitas..."
     ];
     for (const p of norekPatterns) {
       const nm = block.match(p);
