@@ -281,7 +281,7 @@
       <h1>SLIK OJK Extractor</h1>
       <p class="subtitle">Upload satu atau lebih PDF SLIK OJK — ekstrak data debitur &amp; fasilitas kredit secara otomatis</p>
     </div>
-    <span class="version-chip">v2.7</span>
+    <span class="version-chip">v2.8</span>
   </div>
 
   <!-- Upload Area -->
@@ -668,9 +668,19 @@ function parseBlock(block, bankName, bakiRaw, preBlock, bankType) {
 
   // No Rekening / Akad
   if (bankType === 'bpr') {
-    // Format raw text: "No Rekening 1510516360 Kualitas 2 - Dalam Perhatian Khusus"
-    const norekM = block.match(/No Rekening\s+(\d+)\s+Kualitas/);
-    if (norekM) f.noRekening = norekM[1];
+    // Coba berbagai variasi format pdf.js:
+    // "No Rekening 1510516360 Kualitas..."  → spasi normal
+    // "No Rekening\n1510516360 Kualitas..."  → newline sebelum angka
+    // "No Rekening1510516360 Kualitas..."    → tanpa spasi
+    const norekPatterns = [
+      /No Rekening\s+(\d{6,15})\s+Kualitas/,
+      /No Rekening\s*\n\s*(\d{6,15})/,
+      /No Rekening\s*(\d{6,15})/,
+    ];
+    for (const p of norekPatterns) {
+      const nm = block.match(p);
+      if (nm) { f.noRekening = nm[1]; break; }
+    }
     // fallback: angka diawali 151
     if (!f.noRekening) {
       const fallbackM = block.match(/\b(151\d{5,12})\b/);
@@ -832,12 +842,17 @@ function showDebug(id) {
   // Test regex BPR live
   const bprRegex = /601109[\s\S]{0,40}?Bumi\s*Artha/gi;
   const bprMatch = bprRegex.exec(item.rawText || '');
-  const bprFound = bprMatch ? bprMatch[0].replace(/</g,'&lt;') : '(tidak ditemukan)';
+  const bprFound = bprMatch ? bprMatch[0].replace(/</g,'&lt;').replace(/\n/g,'↵\n') : '(tidak ditemukan)';
+
+  // Ambil block BPR (500 char setelah match)
+  const bprBlockRaw = bprMatch
+    ? (item.rawText||'').substring(bprMatch.index, bprMatch.index + 500).replace(/</g,'&lt;').replace(/\n/g,'↵\n')
+    : '(BPR tidak ditemukan)';
 
   // Cari "No Rekening" di raw text
   const norekIdx = (item.rawText||'').indexOf('No Rekening');
   const norekSnippet = norekIdx >= 0
-    ? (item.rawText||'').substring(norekIdx, norekIdx+100).replace(/</g,'&lt;')
+    ? (item.rawText||'').substring(norekIdx, norekIdx+100).replace(/</g,'&lt;').replace(/\n/g,'↵\n')
     : '(tidak ditemukan)';
 
   body.innerHTML = `
@@ -847,7 +862,9 @@ function showDebug(id) {
       <div class="debug-val">${JSON.stringify(d.fasilitas, null, 2)}</div></div>
     <div class="debug-field"><div class="debug-label">BPR Regex Match</div>
       <pre>${bprFound}</pre></div>
-    <div class="debug-field"><div class="debug-label">No Rekening (raw text snippet)</div>
+    <div class="debug-field"><div class="debug-label">BPR Block (500 char) — ↵ = newline</div>
+      <pre>${bprBlockRaw}</pre></div>
+    <div class="debug-field"><div class="debug-label">No Rekening (raw text snippet) — ↵ = newline</div>
       <pre>${norekSnippet}</pre></div>
     <div class="debug-field"><div class="debug-label">Raw Text (500 karakter pertama)</div>
       <pre>${(item.rawText||'').substring(0,500).replace(/</g,'&lt;')}</pre></div>`;
