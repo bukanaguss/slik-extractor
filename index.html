@@ -281,7 +281,7 @@
       <h1>SLIK OJK Extractor</h1>
       <p class="subtitle">Upload satu atau lebih PDF SLIK OJK — ekstrak data debitur &amp; fasilitas kredit secara otomatis</p>
     </div>
-    <span class="version-chip">v2.4</span>
+    <span class="version-chip">v2.5</span>
   </div>
 
   <!-- Upload Area -->
@@ -666,13 +666,13 @@ function parseBlock(block, bankName, bakiRaw, preBlock, bankType) {
 
   // No Rekening / Akad
   if (bankType === 'bpr') {
-    // BPR Eka Bumi Artha: nomor rekening diawali 151
-    const norekM = block.match(/\b(151\d{6,15})\b/);
+    // BPR Eka Bumi Artha: nomor rekening ada di baris "No Rekening 1510516360 Kualitas..."
+    const norekM = block.match(/No Rekening\s+(\d+)\s+Kualitas/i);
     if (norekM) f.noRekening = norekM[1];
-    // fallback ke pola akad jika tidak ketemu 151...
+    // fallback: cari angka diawali 151
     if (!f.noRekening) {
-      const akadM = block.match(/No Akad Awal\s+([A-Z0-9\/\\_\-\.]{5,50})\s/);
-      if (akadM) f.noRekening = akadM[1].trim();
+      const fallbackM = block.match(/\b(151\d{5,12})\b/);
+      if (fallbackM) f.noRekening = fallbackM[1];
     }
   } else {
     // BPD Lampung dan lainnya
