@@ -281,7 +281,7 @@
       <h1>SLIK OJK Extractor</h1>
       <p class="subtitle">Upload satu atau lebih PDF SLIK OJK — ekstrak data debitur &amp; fasilitas kredit secara otomatis</p>
     </div>
-    <span class="version-chip">v2.8</span>
+    <span class="version-chip">v2.9</span>
   </div>
 
   <!-- Upload Area -->
@@ -668,16 +668,14 @@ function parseBlock(block, bankName, bakiRaw, preBlock, bankType) {
 
   // No Rekening / Akad
   if (bankType === 'bpr') {
-    // Berbagai variasi format pdf.js untuk No Rekening BPR:
-    // 1. "No Rekening 1510516360 Kualitas..."       → nomor & kualitas satu baris
-    // 2. "No Rekening\n1510516360 Kualitas..."       → newline sebelum angka
-    // 3. "No Rekening1510516360 Kualitas..."         → tanpa spasi
-    // 4. "No Rekening Kualitas 5 - Macet\n2075\n"   → nomor di baris SETELAH kualitas (format YUNIATI)
+    // Coba berbagai variasi format pdf.js:
+    // "No Rekening 1510516360 Kualitas..."  → spasi normal
+    // "No Rekening\n1510516360 Kualitas..."  → newline sebelum angka
+    // "No Rekening1510516360 Kualitas..."    → tanpa spasi
     const norekPatterns = [
-      /No Rekening\s+(\d{6,15})\s+Kualitas/,          // nomor sebelum Kualitas
-      /No Rekening\s*\n\s*(\d{6,15})/,                 // newline sebelum nomor
-      /No Rekening\s*(\d{6,15})/,                      // langsung tanpa spasi
-      /No Rekening\s+Kualitas[^\n]*\n\s*(\d{4,15})\b/, // nomor di baris setelah "No Rekening Kualitas..."
+      /No Rekening\s+(\d{6,15})\s+Kualitas/,
+      /No Rekening\s*\n\s*(\d{6,15})/,
+      /No Rekening\s*(\d{6,15})/,
     ];
     for (const p of norekPatterns) {
       const nm = block.match(p);
@@ -902,11 +900,9 @@ function exportExcel() {
   const headers = [
     'No', 'Nama Debitur', 'NIK', 'Tempat / Tgl Lahir', 'Jenis Kelamin',
     // BPD Lampung
-    'No. Rek BPD Lampung', 'Plafon BPD (Rp)', 'Baki Debet BPD (Rp)', 'Bunga BPD (%)', 'Kualitas BPD',
-    'Tgl Awal BPD', 'Tgl Akhir BPD', 'Jangka Waktu BPD (Bln)',
+    'No. Rek BPD Lampung', 'Plafon BPD (Rp)', 'Baki Debet BPD (Rp)', 'Bunga BPD (%)', 'Kualitas BPD', 'Awal Fasilitas BPD', 'Akhir Fasilitas BPD',
     // BPR EBA
-    'No. Rek BPR Eka Bumi Artha', 'Plafon BPR (Rp)', 'Baki Debet BPR (Rp)', 'Bunga BPR (%)', 'Kualitas BPR',
-    'Tgl Awal BPR', 'Tgl Akhir BPR', 'Jangka Waktu BPR (Bln)',
+    'No. Rek BPR Eka Bumi Artha', 'Plafon BPR (Rp)', 'Baki Debet BPR (Rp)', 'Bunga BPR (%)', 'Kualitas BPR', 'Awal Fasilitas BPR', 'Akhir Fasilitas BPR',
     'File Sumber'
   ];
 
@@ -914,14 +910,13 @@ function exportExcel() {
   let no = 1;
 
   Object.values(debiturMap).forEach(d => {
-    const maxBpd = Math.max(d.bpd.length, 1); // minimal 1 baris per debitur
+    const maxBpd = Math.max(d.bpd.length, 1);
 
     for (let i = 0; i < maxBpd; i++) {
       const bpd = d.bpd[i] || null;
       const isFirstRow = i === 0;
 
       xlsRows.push([
-        // Info debitur hanya di baris pertama, baris lanjutan BPD dikosongkan
         isFirstRow ? no++    : '',
         isFirstRow ? d.nama||'' : '',
         isFirstRow ? d.nik||''  : '',
@@ -929,14 +924,13 @@ function exportExcel() {
         isFirstRow ? d.jk||''   : '',
 
         // Kolom BPD Lampung
-        bpd ? bpd.noRekening||''              : '',
-        bpd ? parseRp(bpd.plafonAwal||'')     : '',
-        bpd ? parseRp(bpd.bakiDebet||'')      : '',
+        bpd ? bpd.noRekening||''                      : '',
+        bpd ? parseRp(bpd.plafonAwal||'')             : '',
+        bpd ? parseRp(bpd.bakiDebet||'')              : '',
         bpd && bpd.sukuBunga ? parseFloat(bpd.sukuBunga) : '',
-        bpd ? bpd.kualitas||''                : '',
-        bpd ? formatTanggalDDMMYYYY(bpd.awalFasilitas||'')  : '',
-        bpd ? formatTanggalDDMMYYYY(bpd.akhirFasilitas||'') : '',
-        bpd ? hitungJangkaWaktu(bpd.awalFasilitas||'', bpd.akhirFasilitas||'') : '',
+        bpd ? bpd.kualitas||''                        : '',
+        bpd ? bpd.awalFasilitas||''                   : '',
+        bpd ? bpd.akhirFasilitas||''                  : '',
 
         // Kolom BPR EBA — hanya di baris pertama
         isFirstRow && d.bpr ? d.bpr.noRekening||''              : '',
@@ -944,9 +938,8 @@ function exportExcel() {
         isFirstRow && d.bpr ? parseRp(d.bpr.bakiDebet||'')      : '',
         isFirstRow && d.bpr && d.bpr.sukuBunga ? parseFloat(d.bpr.sukuBunga) : '',
         isFirstRow && d.bpr ? d.bpr.kualitas||''                : '',
-        isFirstRow && d.bpr ? formatTanggalDDMMYYYY(d.bpr.awalFasilitas||'')  : '',
-        isFirstRow && d.bpr ? formatTanggalDDMMYYYY(d.bpr.akhirFasilitas||'') : '',
-        isFirstRow && d.bpr ? hitungJangkaWaktu(d.bpr.awalFasilitas||'', d.bpr.akhirFasilitas||'') : '',
+        isFirstRow && d.bpr ? d.bpr.awalFasilitas||''           : '',
+        isFirstRow && d.bpr ? d.bpr.akhirFasilitas||''          : '',
 
         isFirstRow ? d.sourceFile||'' : '',
       ]);
@@ -954,17 +947,17 @@ function exportExcel() {
   });
 
   const ws1 = XLSX.utils.aoa_to_sheet([headers, ...xlsRows]);
-  // Lebar kolom: No, Nama, NIK, TTL, JK, NoRekBPD, Plafon, Baki, Bunga, Kual, AwalBPD, AkhirBPD, JwBPD, NoRekBPR, Plafon, Baki, Bunga, Kual, AwalBPR, AkhirBPR, JwBPR, File
-  ws1['!cols'] = [4,22,18,26,12, 28,16,16,10,18,14,14,12, 28,16,16,10,18,14,14,12, 30].map(w=>({wch:w}));
-  // Format angka — G=plafon BPD, H=baki BPD, P=plafon BPR, Q=baki BPR
+  // No,Nama,NIK,TTL,JK, NoRekBPD,PlafonBPD,BakiBPD,BungaBPD,KualBPD,AwalBPD,AkhirBPD, NoRekBPR,PlafonBPR,BakiBPR,BungaBPR,KualBPR,AwalBPR,AkhirBPR, File
+  ws1['!cols'] = [4,22,18,26,12, 28,16,16,10,18,16,16, 28,16,16,10,18,16,16, 30].map(w=>({wch:w}));
+  // Format angka: G=PlafonBPD, H=BakiBPD, N=PlafonBPR, O=BakiBPR
   xlsRows.forEach((_, i) => {
     const row = i + 2;
-    ['G','H','P','Q'].forEach(col => {
+    ['G','H','N','O'].forEach(col => {
       const c = ws1[col + row];
       if (c && typeof c.v === 'number') c.z = '#,##0';
     });
-    // I=bunga BPD, R=bunga BPR
-    ['I','R'].forEach(col => {
+    // Bunga: I=BungaBPD, P=BungaBPR
+    ['I','P'].forEach(col => {
       const c = ws1[col + row];
       if (c && typeof c.v === 'number') c.z = '0.00';
     });
@@ -975,9 +968,7 @@ function exportExcel() {
   const sh2 = [[
     'Nama Debitur','NIK','Tempat/Tgl Lahir','Jenis Kelamin',
     'Jml Fasilitas BPD','Total Plafon BPD (Rp)','Total Baki BPD (Rp)',
-    'Tgl Awal BPD','Tgl Akhir BPD','Jangka Waktu BPD (Bln)',
     'Jml Fasilitas BPR','Total Plafon BPR (Rp)','Total Baki BPR (Rp)',
-    'Tgl Awal BPR','Tgl Akhir BPR','Jangka Waktu BPR (Bln)',
     'Total Plafon (Rp)','Total Baki Debet (Rp)'
   ]];
   Object.values(debiturMap).forEach(d => {
@@ -985,26 +976,18 @@ function exportExcel() {
     const totBakiBpd   = d.bpd.reduce((s,f)=>s+parseRp(f.bakiDebet||''),0);
     const totPlafonBpr = d.bpr ? parseRp(d.bpr.plafonAwal||'') : 0;
     const totBakiBpr   = d.bpr ? parseRp(d.bpr.bakiDebet||'')  : 0;
-    // Ambil tanggal dari fasilitas BPD pertama
-    const bpdFirst = d.bpd[0] || null;
     sh2.push([
       d.nama||'', d.nik||'', d.ttl||'', d.jk||'',
       d.bpd.length, totPlafonBpd, totBakiBpd,
-      bpdFirst ? formatTanggalDDMMYYYY(bpdFirst.awalFasilitas||'') : '',
-      bpdFirst ? formatTanggalDDMMYYYY(bpdFirst.akhirFasilitas||'') : '',
-      bpdFirst ? hitungJangkaWaktu(bpdFirst.awalFasilitas||'', bpdFirst.akhirFasilitas||'') : '',
       d.bpr ? 1 : 0, totPlafonBpr, totBakiBpr,
-      d.bpr ? formatTanggalDDMMYYYY(d.bpr.awalFasilitas||'') : '',
-      d.bpr ? formatTanggalDDMMYYYY(d.bpr.akhirFasilitas||'') : '',
-      d.bpr ? hitungJangkaWaktu(d.bpr.awalFasilitas||'', d.bpr.akhirFasilitas||'') : '',
       totPlafonBpd + totPlafonBpr,
       totBakiBpd   + totBakiBpr
     ]);
   });
   const ws2 = XLSX.utils.aoa_to_sheet(sh2);
-  ws2['!cols'] = [22,18,26,12, 10,18,18,14,14,12, 10,18,18,14,14,12, 18,18].map(w=>({wch:w}));
+  ws2['!cols'] = [22,18,26,12, 10,18,18, 10,18,18, 18,18].map(w=>({wch:w}));
   sh2.slice(1).forEach((_,i) => {
-    ['F','G','L','M','Q','R'].forEach(col => {
+    ['F','G','I','J','K','L'].forEach(col => {
       const c = ws2[col+(i+2)];
       if (c && typeof c.v === 'number') c.z = '#,##0';
     });
@@ -1043,44 +1026,6 @@ function parseRp(str) {
   return parseFloat(str.replace(/[Rp\s]/g,'').replace(/\./g,'').replace(',','.')) || 0;
 }
 function formatRp(num) { return 'Rp ' + Math.round(num).toLocaleString('id-ID'); }
-
-// Konversi string tanggal SLIK ("15 Januari 2022") ke Date object
-const BULAN_ID = {
-  'januari':0,'februari':1,'maret':2,'april':3,'mei':4,'juni':5,
-  'juli':6,'agustus':7,'september':8,'oktober':9,'november':10,'desember':11
-};
-function parseTanggal(str) {
-  if (!str || str === '—') return null;
-  // Format: "15 Januari 2022" atau "15/01/2022" atau "15-01-2022"
-  str = str.trim();
-  const m1 = str.match(/^(\d{1,2})\s+(\w+)\s+(\d{4})$/i);
-  if (m1) {
-    const bln = BULAN_ID[m1[2].toLowerCase()];
-    if (bln !== undefined) return new Date(+m1[3], bln, +m1[1]);
-  }
-  const m2 = str.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
-  if (m2) return new Date(+m2[3], +m2[2]-1, +m2[1]);
-  return null;
-}
-
-function formatTanggalDDMMYYYY(str) {
-  const d = parseTanggal(str);
-  if (!d) return '';
-  const dd = String(d.getDate()).padStart(2,'0');
-  const mm = String(d.getMonth()+1).padStart(2,'0');
-  const yyyy = d.getFullYear();
-  return `${dd}/${mm}/${yyyy}`;
-}
-
-// Hitung jangka waktu dalam bulan (dibulatkan)
-function hitungJangkaWaktu(awal, akhir) {
-  const dAwal  = parseTanggal(awal);
-  const dAkhir = parseTanggal(akhir);
-  if (!dAwal || !dAkhir) return '';
-  const bulan = (dAkhir.getFullYear() - dAwal.getFullYear()) * 12
-              + (dAkhir.getMonth() - dAwal.getMonth());
-  return bulan > 0 ? bulan : '';
-}
 </script>
 </body>
 </html>
