@@ -281,7 +281,7 @@
       <h1>SLIK OJK Extractor</h1>
       <p class="subtitle">Upload satu atau lebih PDF SLIK OJK — ekstrak data debitur &amp; fasilitas kredit secara otomatis</p>
     </div>
-    <span class="version-chip">v2.5</span>
+    <span class="version-chip">v2.6</span>
   </div>
 
   <!-- Upload Area -->
@@ -636,7 +636,9 @@ function extractFasilitas(text) {
   });
 
   // === BPR EKA BUMI ARTHA ===
-  const bprRegex = /601109\s*-\s*PT\.?\s*Bank\s*Perekonomian\s*Rakyat\s*Eka[\s\S]{0,30}?Bumi\s*Artha/gi;
+  // Raw text: "601109 - PT. Bank Perekonomian Rakyat Eka KC Kotabumi Rp ...\nBumi Artha"
+  // Nama terpotong newline antara "Eka" dan "Bumi Artha"
+  const bprRegex = /601109\s*-\s*PT\.?\s*Bank\s*Perekonomian\s*Rakyat\s*Eka[^\n]*\n[^\n]*Bumi\s*Artha/gi;
   const bprMatches = [];
   while ((m = bprRegex.exec(text)) !== null) {
     bprMatches.push({ index: m.index });
@@ -666,10 +668,10 @@ function parseBlock(block, bankName, bakiRaw, preBlock, bankType) {
 
   // No Rekening / Akad
   if (bankType === 'bpr') {
-    // BPR Eka Bumi Artha: nomor rekening ada di baris "No Rekening 1510516360 Kualitas..."
-    const norekM = block.match(/No Rekening\s+(\d+)\s+Kualitas/i);
+    // Format raw text: "No Rekening 1510516360 Kualitas 2 - Dalam Perhatian Khusus"
+    const norekM = block.match(/No Rekening\s+(\d+)\s+Kualitas/);
     if (norekM) f.noRekening = norekM[1];
-    // fallback: cari angka diawali 151
+    // fallback: angka diawali 151
     if (!f.noRekening) {
       const fallbackM = block.match(/\b(151\d{5,12})\b/);
       if (fallbackM) f.noRekening = fallbackM[1];
