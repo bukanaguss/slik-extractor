@@ -281,7 +281,7 @@
       <h1>SLIK OJK Extractor</h1>
       <p class="subtitle">Upload satu atau lebih PDF SLIK OJK — ekstrak data debitur &amp; fasilitas kredit secara otomatis</p>
     </div>
-    <span class="version-chip">v2.9</span>
+    <span class="version-chip">v3.0</span>
   </div>
 
   <!-- Upload Area -->
@@ -872,7 +872,39 @@ function showDebug(id) {
 }
 function closeDebug() { document.getElementById('debugModal').classList.remove('open'); }
 
-// ── Export Excel ───────────────────────────────────────────────────────────────
+// ── Helper tanggal ─────────────────────────────────────────────────────────────
+const BULAN_ID = {
+  januari:1, februari:2, maret:3, april:4, mei:5, juni:6,
+  juli:7, agustus:8, september:9, oktober:10, november:11, desember:12
+};
+
+// "03 Februari 2026" → { d, m, y } atau null
+function parseTanggalId(str) {
+  if (!str || str === '—') return null;
+  const m = str.trim().match(/(\d{1,2})\s+(\w+)\s+(\d{4})/i);
+  if (!m) return null;
+  const bln = BULAN_ID[m[2].toLowerCase()];
+  if (!bln) return null;
+  return { d: parseInt(m[1]), m: bln, y: parseInt(m[3]) };
+}
+
+// "03 Februari 2026" → "03/02/2026"
+function formatTglDDMMYYYY(str) {
+  const t = parseTanggalId(str);
+  if (!t) return str || '';
+  return String(t.d).padStart(2,'0') + '/' + String(t.m).padStart(2,'0') + '/' + t.y;
+}
+
+// Hitung jangka waktu dalam bulan antara awal dan akhir
+function hitungJangkaWaktu(awalStr, akhirStr) {
+  const a = parseTanggalId(awalStr);
+  const b = parseTanggalId(akhirStr);
+  if (!a || !b) return '';
+  const bulan = (b.y - a.y) * 12 + (b.m - a.m);
+  return bulan > 0 ? bulan : '';
+}
+
+
 function exportExcel() {
   if (!allRows.length) return;
   const wb = XLSX.utils.book_new();
@@ -900,9 +932,9 @@ function exportExcel() {
   const headers = [
     'No', 'Nama Debitur', 'NIK', 'Tempat / Tgl Lahir', 'Jenis Kelamin',
     // BPD Lampung
-    'No. Rek BPD Lampung', 'Plafon BPD (Rp)', 'Baki Debet BPD (Rp)', 'Bunga BPD (%)', 'Kualitas BPD', 'Awal Fasilitas BPD', 'Akhir Fasilitas BPD',
+    'No. Rek BPD Lampung', 'Plafon BPD (Rp)', 'Baki Debet BPD (Rp)', 'Bunga BPD (%)', 'Kualitas BPD', 'Awal Fasilitas BPD', 'Akhir Fasilitas BPD', 'Jangka Waktu BPD (bln)',
     // BPR EBA
-    'No. Rek BPR Eka Bumi Artha', 'Plafon BPR (Rp)', 'Baki Debet BPR (Rp)', 'Bunga BPR (%)', 'Kualitas BPR', 'Awal Fasilitas BPR', 'Akhir Fasilitas BPR',
+    'No. Rek BPR Eka Bumi Artha', 'Plafon BPR (Rp)', 'Baki Debet BPR (Rp)', 'Bunga BPR (%)', 'Kualitas BPR', 'Awal Fasilitas BPR', 'Akhir Fasilitas BPR', 'Jangka Waktu BPR (bln)',
     'File Sumber'
   ];
 
@@ -924,22 +956,24 @@ function exportExcel() {
         isFirstRow ? d.jk||''   : '',
 
         // Kolom BPD Lampung
-        bpd ? bpd.noRekening||''                      : '',
-        bpd ? parseRp(bpd.plafonAwal||'')             : '',
-        bpd ? parseRp(bpd.bakiDebet||'')              : '',
-        bpd && bpd.sukuBunga ? parseFloat(bpd.sukuBunga) : '',
-        bpd ? bpd.kualitas||''                        : '',
-        bpd ? bpd.awalFasilitas||''                   : '',
-        bpd ? bpd.akhirFasilitas||''                  : '',
+        bpd ? bpd.noRekening||''                                              : '',
+        bpd ? parseRp(bpd.plafonAwal||'')                                     : '',
+        bpd ? parseRp(bpd.bakiDebet||'')                                      : '',
+        bpd && bpd.sukuBunga ? parseFloat(bpd.sukuBunga)                      : '',
+        bpd ? bpd.kualitas||''                                                : '',
+        bpd ? formatTglDDMMYYYY(bpd.awalFasilitas)                           : '',
+        bpd ? formatTglDDMMYYYY(bpd.akhirFasilitas)                          : '',
+        bpd ? hitungJangkaWaktu(bpd.awalFasilitas, bpd.akhirFasilitas)       : '',
 
         // Kolom BPR EBA — hanya di baris pertama
-        isFirstRow && d.bpr ? d.bpr.noRekening||''              : '',
-        isFirstRow && d.bpr ? parseRp(d.bpr.plafonAwal||'')     : '',
-        isFirstRow && d.bpr ? parseRp(d.bpr.bakiDebet||'')      : '',
-        isFirstRow && d.bpr && d.bpr.sukuBunga ? parseFloat(d.bpr.sukuBunga) : '',
-        isFirstRow && d.bpr ? d.bpr.kualitas||''                : '',
-        isFirstRow && d.bpr ? d.bpr.awalFasilitas||''           : '',
-        isFirstRow && d.bpr ? d.bpr.akhirFasilitas||''          : '',
+        isFirstRow && d.bpr ? d.bpr.noRekening||''                                          : '',
+        isFirstRow && d.bpr ? parseRp(d.bpr.plafonAwal||'')                                 : '',
+        isFirstRow && d.bpr ? parseRp(d.bpr.bakiDebet||'')                                  : '',
+        isFirstRow && d.bpr && d.bpr.sukuBunga ? parseFloat(d.bpr.sukuBunga)                : '',
+        isFirstRow && d.bpr ? d.bpr.kualitas||''                                             : '',
+        isFirstRow && d.bpr ? formatTglDDMMYYYY(d.bpr.awalFasilitas)                        : '',
+        isFirstRow && d.bpr ? formatTglDDMMYYYY(d.bpr.akhirFasilitas)                       : '',
+        isFirstRow && d.bpr ? hitungJangkaWaktu(d.bpr.awalFasilitas, d.bpr.akhirFasilitas)  : '',
 
         isFirstRow ? d.sourceFile||'' : '',
       ]);
@@ -947,17 +981,17 @@ function exportExcel() {
   });
 
   const ws1 = XLSX.utils.aoa_to_sheet([headers, ...xlsRows]);
-  // No,Nama,NIK,TTL,JK, NoRekBPD,PlafonBPD,BakiBPD,BungaBPD,KualBPD,AwalBPD,AkhirBPD, NoRekBPR,PlafonBPR,BakiBPR,BungaBPR,KualBPR,AwalBPR,AkhirBPR, File
-  ws1['!cols'] = [4,22,18,26,12, 28,16,16,10,18,16,16, 28,16,16,10,18,16,16, 30].map(w=>({wch:w}));
-  // Format angka: G=PlafonBPD, H=BakiBPD, N=PlafonBPR, O=BakiBPR
+  // No,Nama,NIK,TTL,JK, NoRekBPD,PlafonBPD,BakiBPD,BungaBPD,KualBPD,AwalBPD,AkhirBPD,JwBPD, NoRekBPR,PlafonBPR,BakiBPR,BungaBPR,KualBPR,AwalBPR,AkhirBPR,JwBPR, File
+  ws1['!cols'] = [4,22,18,26,12, 28,16,16,10,18,14,14,10, 28,16,16,10,18,14,14,10, 30].map(w=>({wch:w}));
   xlsRows.forEach((_, i) => {
     const row = i + 2;
-    ['G','H','N','O'].forEach(col => {
+    // Plafon & Baki: G=PlafonBPD, H=BakiBPD, O=PlafonBPR, P=BakiBPR
+    ['G','H','O','P'].forEach(col => {
       const c = ws1[col + row];
       if (c && typeof c.v === 'number') c.z = '#,##0';
     });
-    // Bunga: I=BungaBPD, P=BungaBPR
-    ['I','P'].forEach(col => {
+    // Bunga: I=BungaBPD, Q=BungaBPR
+    ['I','Q'].forEach(col => {
       const c = ws1[col + row];
       if (c && typeof c.v === 'number') c.z = '0.00';
     });
