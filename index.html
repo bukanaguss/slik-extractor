@@ -6,7 +6,7 @@
   <title>SLIK OJK Extractor</title>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <style>
     :root {
       --bg: #0f1117;
@@ -281,7 +281,7 @@
       <h1>SLIK OJK Extractor</h1>
       <p class="subtitle">Upload satu atau lebih PDF SLIK OJK — ekstrak data debitur &amp; fasilitas kredit secara otomatis</p>
     </div>
-    <span class="version-chip">v3.1</span>
+    <span class="version-chip">v3.0</span>
   </div>
 
   <!-- Upload Area -->
@@ -558,35 +558,29 @@ function extractData(text) {
 function extractDebitur(text) {
   const d = {};
 
-  // Nama: pola CAPS diikuti "NIK /" — ambil yang pertama
+  // Nama: pola CAPS diikuti "NIK /" — lebih fleksibel dari sebelumnya
   const namaPatterns = [
-    /([A-Z]{2,}(?:\s+[A-Z']+){0,6})\s+NIK\s*\//,
-    /Nama\s*[:\-\/]\s*([A-Z][A-Z\s'\.]{3,50})\s*\n/i,
+    /([A-Z]{2,}(?:\s+[A-Z']+){0,6})\s+NIK\s*\//,          // pola utama
+    /Nama\s*[:\-\/]\s*([A-Z][A-Z\s'\.]{3,50})\s*\n/i,      // "Nama : BUDI SANTOSO"
+    /^([A-Z]{3,}(?:\s+[A-Z]+){1,5})\s*$/m,                  // baris CAPS saja
   ];
   for (const pat of namaPatterns) {
     const m = text.match(pat);
     if (m) { d.nama = m[1].trim(); break; }
   }
 
-  // NIK: ambil dari blok yang pelapor-nya BPR Eka Bumi Artha
-  // Format: "YUNIATI NIK /\n1803027006760004\n...\nPT. Bank Perekonomian Rakyat Eka Bumi Artha"
-  const bprBlock = text.match(/NIK\s*\/[\s\n]*(\d{16})[\s\S]{0,300}?PT\.?\s*Bank\s*Perekonomian\s*Rakyat\s*Eka/i);
-  if (bprBlock) {
-    d.nik = bprBlock[1];
-  } else {
-    // fallback: NIK pertama yang ditemukan
-    const nikPatterns = [
-      /NIK\s*\/[\s\n]*(\d{16})/,
-      /NIK\s*[:\-]\s*(\d{16})/,
-      /\b(\d{16})\b/,
-    ];
-    for (const pat of nikPatterns) {
-      const m = text.match(pat);
-      if (m) { d.nik = m[1]; break; }
-    }
+  // NIK: 16 digit
+  const nikPatterns = [
+    /NIK\s*\/[\s\n]*(\d{16})/,
+    /NIK\s*[:\-]\s*(\d{16})/,
+    /\b(\d{16})\b/,
+  ];
+  for (const pat of nikPatterns) {
+    const m = text.match(pat);
+    if (m) { d.nik = m[1]; break; }
   }
 
-  // TTL
+  // TTL: kota / tanggal
   const ttlPatterns = [
     /([A-Z]{3,}(?:\s+[A-Z]+)*)\s*\/\s*\n?(\d{1,2}\s+\w+\s+\d{4})/,
     /Tempat.*?Lahir\s*[:\-\/]\s*([A-Z][A-Z\s]+)\s*\n?\s*(\d{1,2}[\s\/\-]\w+[\s\/\-]\d{4})/i,
@@ -987,45 +981,20 @@ function exportExcel() {
   });
 
   const ws1 = XLSX.utils.aoa_to_sheet([headers, ...xlsRows]);
+  // No,Nama,NIK,TTL,JK, NoRekBPD,PlafonBPD,BakiBPD,BungaBPD,KualBPD,AwalBPD,AkhirBPD,JwBPD, NoRekBPR,PlafonBPR,BakiBPR,BungaBPR,KualBPR,AwalBPR,AkhirBPR,JwBPR, File
   ws1['!cols'] = [4,22,18,26,12, 28,16,16,10,18,14,14,10, 28,16,16,10,18,14,14,10, 30].map(w=>({wch:w}));
-
-  // Tandai baris mana yang perlu diwarnai (debitur BPD > 1 fasilitas)
-  const totalCols = headers.length;
-  const colLetters = Array.from({length: totalCols}, (_,i) => {
-    const n = i;
-    return n < 26 ? String.fromCharCode(65+n) : String.fromCharCode(64+Math.floor(n/26)) + String.fromCharCode(65+(n%26));
-  });
-
-  // Bangun peta: row Excel → perlu warna?
-  let excelRow = 2;
-  const highlightRows = new Set();
-  Object.values(debiturMap).forEach(d => {
-    const maxBpd = Math.max(d.bpd.length, 1);
-    if (d.bpd.length > 1) {
-      for (let i = 0; i < maxBpd; i++) highlightRows.add(excelRow + i);
-    }
-    excelRow += maxBpd;
-  });
-
-  // Terapkan format angka + warna
   xlsRows.forEach((_, i) => {
     const row = i + 2;
+    // Plafon & Baki: G=PlafonBPD, H=BakiBPD, O=PlafonBPR, P=BakiBPR
     ['G','H','O','P'].forEach(col => {
       const c = ws1[col + row];
       if (c && typeof c.v === 'number') c.z = '#,##0';
     });
+    // Bunga: I=BungaBPD, Q=BungaBPR
     ['I','Q'].forEach(col => {
       const c = ws1[col + row];
       if (c && typeof c.v === 'number') c.z = '0.00';
     });
-    // Warna kuning muda untuk baris BPD > 1
-    if (highlightRows.has(row)) {
-      colLetters.forEach(col => {
-        const addr = col + row;
-        if (!ws1[addr]) ws1[addr] = { t:'s', v:'' };
-        ws1[addr].s = { fill: { fgColor: { rgb: 'FFF9C4' }, patternType: 'solid' } };
-      });
-    }
   });
   XLSX.utils.book_append_sheet(wb, ws1, 'Fasilitas Kredit');
 
